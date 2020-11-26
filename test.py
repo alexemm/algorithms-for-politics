@@ -1,4 +1,4 @@
-from majority_digraph import get_edge_tuples, determine_alternatives
+from majority_digraph import get_edge_tuples, determine_alternatives, create_majority_digraph
 from utils import read_file
 
 
@@ -10,6 +10,7 @@ def test():
     print(alternatives)
     edges = get_edge_tuples(alternatives)
     print(list(edges))
+    create_majority_digraph(profile)
 
 
 test()
