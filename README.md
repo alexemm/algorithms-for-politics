@@ -1,0 +1,2 @@
+# condorcet
+Calculate condorcet stuff
