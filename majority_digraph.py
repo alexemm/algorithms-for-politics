@@ -1,6 +1,6 @@
 from typing import Optional, List, Dict, Set, Tuple
 from itertools import product
-from networkx import DiGraph, spring_layout, draw_networkx, get_edge_attributes, draw_networkx_edge_labels
+from networkx import DiGraph, circular_layout, draw_networkx, get_edge_attributes, draw_networkx_edge_labels
 
 import matplotlib.pyplot as plt
 
@@ -29,6 +29,12 @@ class Edges:
         self.edges: Set[Edge] = set([Edge(src, dest, 0) for src, dest in edges])
 
     def add_weight(self, source: str, dest: str):
+        """
+
+        :param source:
+        :param dest:
+        :return:
+        """
         self[(source, dest)].add_weight(1)
         self[(dest, source)].add_weight(-1)
 
@@ -54,13 +60,21 @@ class MajorityDigraph:
         self.edges = [edge for edge in self.edges.edges if edge.weight > 0]
 
     def plot(self, weighted: bool = False, save_file: str = ""):
+        """
+
+        :param weighted:
+        :param save_file:
+        :return:
+        """
         g: DiGraph = DiGraph()
+        for alternative in self.alternatives:
+            g.add_node(alternative)
         for edge in self.edges:
             if weighted:
                 g.add_edge(edge.source, edge.dest, weight=edge.weight)
             else:
                 g.add_edge(edge.source, edge.dest, weight=None)
-        pos = spring_layout(g)
+        pos = circular_layout(g)
         draw_networkx(g, pos, node_color='w')
         if weighted:
             labels = get_edge_attributes(g, 'weight')
@@ -97,17 +111,18 @@ def get_edge_tuples(alternatives: Set[str]):
 
 
 def create_majority_digraph(profile: Dict[str, List[str]]) -> Tuple[Set[str], Edges]:
-    # TODO: finish dis
+    """
+
+    :param profile:
+    :return:
+    """
     alternatives: Set[str] = determine_alternatives(profile)
     edge_list: List[Tuple[str, str]] = list(get_edge_tuples(alternatives))
 
     edges: Edges = Edges(edge_list)
     for voter, ballot in profile.items():
-        #print("Voter: "+voter)
         for winner, loser in generate_duels(ballot):
-            #print(winner + " wins against " + loser)
             edges.add_weight(winner, loser)
-        #print()
     return alternatives, edges
 
 
@@ -124,5 +139,12 @@ def generate_duels(ballot: List[str]):
 
 
 def plot_majority_digraph(profile: Dict[str, List[str]], weighted: bool = False, save_loc: str = ''):
+    """
+
+    :param profile:
+    :param weighted:
+    :param save_loc:
+    :return:
+    """
     mj = MajorityDigraph(profile)
     mj.plot(weighted, save_loc)
