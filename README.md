@@ -1,2 +1,2 @@
-# condorcet
-Calculate condorcet stuff
+# Algorithms for Politics
+This repository contains algorithms which are used for political calculations.
