@@ -1,7 +1,4 @@
-from typing import List, Set, Optional, Dict
-
-import itertools
-import json
+from typing import List, Dict
 
 
 def condorcet_winner(profile: Dict[str, List[str]]) -> List[str]:

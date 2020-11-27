@@ -4,7 +4,7 @@ setup(
     name='PolAlgo',
     version='1.0',
     packages=[''],
-    url='https://github.com/alexemm/condorcet',
+    url='https://github.com/alexemm/algorithms-for-politics',
     license='',
     author='Alexander Emmerich',
     author_email='al_emmerich@gmx.de',

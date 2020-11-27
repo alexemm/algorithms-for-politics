@@ -1,5 +1,5 @@
-from typing import Optional, List, Dict, Set, Tuple
 from itertools import product
+from typing import Optional, List, Dict, Set, Tuple
 from networkx import DiGraph, circular_layout, draw_networkx, get_edge_attributes, draw_networkx_edge_labels
 
 import matplotlib.pyplot as plt
@@ -55,25 +55,25 @@ class Edges:
 
 class MajorityDigraph:
 
-    def __init__(self, profile: Dict[str, List[str]]):
+    def __init__(self, profile: Dict[str, List[Set[str]]]):
         self.alternatives, self.edges = create_majority_digraph(profile)
         self.edges = [edge for edge in self.edges.edges if edge.weight > 0]
 
-    def plot(self, weighted: bool = False, save_file: str = ""):
+    def plot(self, weighted: bool = False, save_file: str = "", show: bool = False):
         """
 
+        :param show:
         :param weighted:
         :param save_file:
         :return:
         """
         g: DiGraph = DiGraph()
+        # Add alternatives (even isolated ones)
         for alternative in self.alternatives:
             g.add_node(alternative)
+        # Add edges
         for edge in self.edges:
-            if weighted:
-                g.add_edge(edge.source, edge.dest, weight=edge.weight)
-            else:
-                g.add_edge(edge.source, edge.dest, weight=None)
+            g.add_edge(edge.source, edge.dest, weight=edge.weight)
         pos = circular_layout(g)
         draw_networkx(g, pos, node_color='w')
         if weighted:
@@ -82,10 +82,14 @@ class MajorityDigraph:
         plt.axis("off")
         if save_file != "":
             plt.savefig(save_file)
-        plt.show()
+        if show:
+            plt.show()
+            plt.close()
+        else:
+            plt.close()
 
 
-def determine_alternatives(profile: Dict[str, List[str]]) -> Set[str]:
+def determine_alternatives(profile: Dict[str, List[Set[str]]]) -> Set[str]:
     """
 
     :param profile:
@@ -93,8 +97,9 @@ def determine_alternatives(profile: Dict[str, List[str]]) -> Set[str]:
     """
     ret_set = set()
     for _, ballot in profile.items():
-        for alternative in ballot:
-            ret_set.add(alternative)
+        for alternatives in ballot:
+            for alternative in alternatives:
+                ret_set.add(alternative)
     return ret_set
 
 
@@ -110,7 +115,7 @@ def get_edge_tuples(alternatives: Set[str]):
     return (tuple(i) for i in product(alternatives, repeat=2) if i[0] != i[1])
 
 
-def create_majority_digraph(profile: Dict[str, List[str]]) -> Tuple[Set[str], Edges]:
+def create_majority_digraph(profile: Dict[str, List[Set[str]]]) -> Tuple[Set[str], Edges]:
     """
 
     :param profile:
@@ -126,21 +131,25 @@ def create_majority_digraph(profile: Dict[str, List[str]]) -> Tuple[Set[str], Ed
     return alternatives, edges
 
 
-def generate_duels(ballot: List[str]):
+def generate_duels(ballot: List[Set[str]]):
     """
 
     :param ballot:
     :return: The winner and the loser as a tuple
     """
-    for index, winner in enumerate(ballot):
-        if index < len(ballot):
-            for loser in ballot[index + 1:]:
-                yield winner, loser
+    for index, winners in enumerate(ballot):
+        for winner in winners:
+            if index < len(ballot):
+                for losers in ballot[index + 1:]:
+                    for loser in losers:
+                        yield winner, loser
 
 
-def plot_majority_digraph(profile: Dict[str, List[str]], weighted: bool = False, save_loc: str = ''):
+def plot_majority_digraph(profile: Dict[str, List[Set[str]]], weighted: bool = False, save_loc: str = '',
+                          show: bool = False):
     """
 
+    :param show:
     :param profile:
     :param weighted:
     :param save_loc:
